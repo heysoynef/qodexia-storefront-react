@@ -1,6 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import {
+  Heart,
+  House,
+  LogIn,
+  LogOut,
+  Package,
+  Search,
+  ShieldCheck,
+  ShoppingBag,
+  ShoppingCart,
+  Sparkles,
+  Star,
+  UserRound,
+} from 'lucide-react'
+import {
   Link,
   NavLink,
   Navigate,
@@ -235,23 +249,23 @@ async function api<T>(path: string, options: ApiOptions = {}): Promise<T> {
 }
 
 function icon(name: string) {
-  const map: Record<string, string> = {
-    home: '⌂',
-    product: '◫',
-    cart: '◔',
-    user: '◎',
-    admin: '▣',
-    login: '→',
-    logout: '↗',
-    bag: '◌',
-    search: '⌕',
-    star: '★',
-    order: '▤',
-    pin: '⌖',
-    heart: '♡',
+  const map = {
+    home: House,
+    product: Package,
+    cart: ShoppingCart,
+    user: UserRound,
+    admin: ShieldCheck,
+    login: LogIn,
+    logout: LogOut,
+    bag: ShoppingBag,
+    search: Search,
+    star: Star,
+    order: Package,
+    pin: Sparkles,
+    heart: Heart,
   }
-
-  return map[name] ?? '•'
+  const Icon = map[name as keyof typeof map] ?? Sparkles
+  return <Icon className="icon" strokeWidth={2.1} />
 }
 
 function App() {
@@ -581,6 +595,20 @@ function HomePage({ state }: { state: AppState }) {
               Entrar a mi cuenta
             </Link>
           )}
+        </div>
+        <div className="hero-stats">
+          <article>
+            <strong>{state.products.length}</strong>
+            <span>productos activos</span>
+          </article>
+          <article>
+            <strong>{state.categories.length}</strong>
+            <span>categorías</span>
+          </article>
+          <article>
+            <strong>24/7</strong>
+            <span>storefront online</span>
+          </article>
         </div>
       </section>
 
