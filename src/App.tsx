@@ -473,6 +473,7 @@ function RequireAuth({ children, state }: { children: ReactNode; state: AppState
 
 function SiteHeader({ state }: { state: AppState }) {
   const [open, setOpen] = useState(false)
+  const accountHref = state.user ? '/perfil' : '/login'
 
   return (
     <header className="site-header">
@@ -502,6 +503,11 @@ function SiteHeader({ state }: { state: AppState }) {
           )}
         </nav>
       </div>
+      <div className="shell mobile-quick-actions">
+        <Link to="/productos">{icon('search')} Buscar</Link>
+        <Link to="/carrito">{icon('cart')} Carrito</Link>
+        <Link to={accountHref}>{state.user ? `${icon('user')} Perfil` : `${icon('login')} Acceso`}</Link>
+      </div>
     </header>
   )
 }
@@ -521,7 +527,7 @@ function SiteFooter({ state }: { state: AppState }) {
         <div>
           <p className="footer-brand">{icon('bag')} Nexo Store</p>
           <p className="footer-copy">
-            Storefront React conectado al backend productivo de Qodexia Commerce.
+            Plataforma ecommerce para comprar tecnología, accesorios y gestionar pedidos.
           </p>
         </div>
         <div>
@@ -537,16 +543,16 @@ function SiteFooter({ state }: { state: AppState }) {
           <p className="footer-title">Soporte</p>
           <div className="footer-links">
             <a href="https://admin.qodexia.site/admin" target="_blank" rel="noreferrer">
-              Administrador
+              Panel admin
             </a>
-            <a href="https://admin.qodexia.site/api/v1/products" target="_blank" rel="noreferrer">
-              API
+            <a href="https://admin.qodexia.site/politicas-y-legales" target="_blank" rel="noreferrer">
+              Políticas y legales
             </a>
             <span>Lun-Vie 09:00 a 18:00</span>
           </div>
         </div>
       </div>
-      <div className="footer-legal">© 2026 Nexo Store.</div>
+      <div className="footer-legal">© 2026 Nexo Store. Todos los derechos reservados.</div>
     </footer>
   )
 }
@@ -558,45 +564,59 @@ function HomePage({ state }: { state: AppState }) {
     <div className="shell page-stack">
       <section className="hero-panel">
         <span className="eyebrow">Tienda en línea</span>
-        <h1>Encuentra tecnología, accesorios y ofertas en un solo lugar.</h1>
+        <h1>Encuentra tecnología, accesorios y ofertas en un solo lugar</h1>
         <p>
-          Replica React del storefront actual, conectada a la API de Qodexia para catálogo,
-          autenticación, cuenta y checkout.
+          Explora el catálogo por categoría, compara productos y compra en minutos desde Nexo Store.
         </p>
         <div className="hero-actions">
-          <Link className="button button--solid" to="/productos">
+          <Link className="button button--solid" to="/productos#productos">
             Ver productos
           </Link>
-          <a className="button button--ghost" href="https://admin.qodexia.site/admin" target="_blank" rel="noreferrer">
-            Panel admin
-          </a>
+          {state.user ? (
+            <Link className="button button--success" to="/productos">
+              Ir al catálogo
+            </Link>
+          ) : (
+            <Link className="button button--ghost" to="/login">
+              Entrar a mi cuenta
+            </Link>
+          )}
         </div>
       </section>
 
-      <SectionTitle
-        title="Productos destacados"
-        subtitle="Una selección inicial del catálogo activo para empezar hoy."
-      />
-      <div className="product-grid">
-        {featured.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+      <section id="productos" className="page-stack">
+        <SectionTitle
+          title="Productos destacados"
+          subtitle="Una selección inicial para empezar hoy. Puedes ver el catálogo completo en la sección de productos."
+        />
+        <div className="product-grid product-grid--featured">
+          {featured.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+        <div>
+          <Link className="button button--outline" to="/productos">
+            Ver todos los productos
+          </Link>
+        </div>
+      </section>
 
-      <SectionTitle
-        title="Categorías"
-        subtitle="Explora por tipo de producto sin salir de la SPA."
-      />
-      <div className="category-grid">
-        {state.categories.map((category) => (
-          <article className="category-card" key={category.id}>
-            <span className="category-card__icon">{icon('search')}</span>
-            <h3>{category.name}</h3>
-            <p>{category.description}</p>
-            <Link to={`/productos?categoria=${category.slug}`}>{category.products_count} producto(s)</Link>
-          </article>
-        ))}
-      </div>
+      <section className="page-stack">
+        <SectionTitle
+          title="Categorías"
+          subtitle="Explora por tipo de producto."
+        />
+        <div className="category-grid">
+          {state.categories.map((category) => (
+            <article className="category-card" key={category.id}>
+              <span className="category-card__icon">{icon('bag')}</span>
+              <h3>{category.name}</h3>
+              <p>{category.products_count} producto(s)</p>
+              <Link to={`/productos?categoria=${category.slug}`}>Ver categoría</Link>
+            </article>
+          ))}
+        </div>
+      </section>
     </div>
   )
 }
@@ -627,15 +647,14 @@ function CatalogPage({ state }: { state: AppState }) {
   return (
     <div className="shell page-stack">
       <section className="hero-panel hero-panel--compact">
-        <span className="eyebrow">Catálogo</span>
         <h1>{activeCategory ? activeCategory.name : 'Catálogo de productos'}</h1>
         <p>
           {activeCategory
             ? activeCategory.description
-            : 'Filtra por categoría o busca por nombre, descripción y tipo de producto.'}
+            : 'Encuentra el producto ideal para tu compra.'}
         </p>
 
-        <div className="catalog-toolbar">
+        <div className="catalog-toolbar catalog-toolbar--search">
           <input
             className="input"
             placeholder="Buscar por producto, descripción o categoría..."
@@ -646,6 +665,11 @@ function CatalogPage({ state }: { state: AppState }) {
             Limpiar
           </Link>
         </div>
+        <p className="muted-copy muted-copy--top">
+          {search.trim() !== ''
+            ? `Resultados para "${search}": ${filtered.length} producto(s).`
+            : `Mostrando ${filtered.length} de ${state.products.length} producto(s).`}
+        </p>
       </section>
 
       <div className="catalog-layout">
@@ -667,9 +691,6 @@ function CatalogPage({ state }: { state: AppState }) {
         </aside>
 
         <div className="page-stack">
-          <p className="muted-copy">
-            Mostrando {filtered.length} de {state.products.length} producto(s).
-          </p>
           <div className="product-grid product-grid--catalog">
             {filtered.map((product) => (
               <ProductCard key={product.id} product={product} compact />
@@ -722,6 +743,12 @@ function ProductPage({ state }: { state: AppState }) {
         <Link to="/">Inicio</Link>
         <span>/</span>
         <Link to="/productos">Productos</Link>
+        {product.categories[0] ? (
+          <>
+            <span>/</span>
+            <Link to={`/productos?categoria=${product.categories[0].slug}`}>{product.categories[0].name}</Link>
+          </>
+        ) : null}
         <span>/</span>
         <span>{product.name}</span>
       </nav>
@@ -734,14 +761,28 @@ function ProductPage({ state }: { state: AppState }) {
           <div className="pill-row">
             {product.categories.map((category) => (
               <span className="pill" key={category.id}>
-                {category.name}
+                Categoría: {category.name}
               </span>
             ))}
+            <span className={product.stock > 0 ? 'availability availability--ok' : 'availability availability--off'}>
+              {product.stock > 0 ? 'Disponible' : 'Próximamente'}
+            </span>
           </div>
           <h1>{product.name}</h1>
           <p className="lead-copy">{product.short_description || product.description}</p>
 
+          <div className="rating-card">
+            <div>
+              <p className="rating-value">Nuevo</p>
+              <p className="rating-copy">Aún sin reseñas publicadas</p>
+            </div>
+            <a className="button button--outline button--small" href="#detalle-producto">
+              Ver detalle
+            </a>
+          </div>
+
           <div className="price-block">
+            <p className="price-label">Precio base</p>
             {product.compare_at_price && product.compare_at_price > effectivePrice ? (
               <p className="price-strikethrough">Antes {money(product.compare_at_price)}</p>
             ) : null}
@@ -783,6 +824,11 @@ function ProductPage({ state }: { state: AppState }) {
           </div>
         </div>
       </div>
+
+      <section className="section-shell product-description" id="detalle-producto">
+        <SectionTitle title="Detalle del producto" subtitle="Información conectada a la API ya desplegada." />
+        <p>{product.description || product.short_description}</p>
+      </section>
     </div>
   )
 }
@@ -813,8 +859,8 @@ function ProductWishlistButton({ productId, state }: { productId: number; state:
   }
 
   return (
-    <button className="button button--ghost" disabled={busy} type="button" onClick={() => void handleToggle()}>
-      {icon('heart')} Wishlist
+    <button className="button button--danger-soft" disabled={busy} type="button" onClick={() => void handleToggle()}>
+      {icon('heart')} Lista de deseos
     </button>
   )
 }
@@ -844,7 +890,6 @@ function AuthPage({ state, mode }: { state: AppState; mode: 'login' | 'register'
   return (
     <div className="shell auth-shell">
       <section className="auth-card">
-        <span className="eyebrow">{mode === 'login' ? 'Acceso' : 'Registro'}</span>
         <h1>{mode === 'login' ? 'Inicia sesión' : 'Crea tu cuenta'}</h1>
         <p>
           {mode === 'login'
@@ -970,7 +1015,10 @@ function CartPage({ state }: { state: AppState }) {
 
           <aside className="summary-card">
             <h3>Resumen</h3>
-            <p>Total</p>
+            <dl className="summary-lines">
+              <div><dt>Productos</dt><dd>{state.cart.count}</dd></div>
+              <div><dt>Total</dt><dd>{money(state.cart.total)}</dd></div>
+            </dl>
             <strong>{money(state.cart.total)}</strong>
             <button className="button button--solid" type="button" onClick={() => navigate('/checkout')}>
               Ir a checkout
