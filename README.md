@@ -1,32 +1,76 @@
-# React + TypeScript + Vite
+# Storefront React
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Frontend público de `storefront.qodexia.site` construido con React, TypeScript y Vite.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19
+- React Router 7
+- Vite 8
+- API Laravel en `https://ecommerce.qodexia.site/api/v1`
 
-## React Compiler
+## Desarrollo local
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Variables:
+
+```bash
+VITE_API_URL=https://ecommerce.qodexia.site/api/v1
+```
+
+## Build
+
+```bash
+npm run build
+```
+
+Salida estática:
+
+```text
+dist/
+```
+
+## Deploy actual
+
+El sitio público `https://storefront.qodexia.site` se sirve con Nginx desde:
+
+```text
+/opt/storefront-react/dist
+```
+
+Deploy manual típico:
+
+```bash
+npm run build
+rsync -avz --delete dist/ qodexia:/opt/storefront-react/dist/
+ssh qodexia "sudo systemctl reload nginx"
+```
+
+Si el alias `qodexia` ya está configurado en SSH, ese flujo es suficiente.
+
+## Rutas principales
+
+- `/`
+- `/productos`
+- `/productos/:slug`
+- `/login`
+- `/register`
+- `/carrito`
+- `/checkout`
+- `/perfil`
+- `/perfil/wishlist`
+- `/perfil/ordenes`
+- `/perfil/direcciones`
+- `/perfil/resenas`
+
+## Validación rápida
+
+Antes de desplegar:
+
+```bash
+npm run build
+```

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import {
+  ArrowRight,
   Heart,
   House,
   LogIn,
@@ -12,7 +13,9 @@ import {
   ShoppingCart,
   Sparkles,
   Star,
+  Truck,
   UserRound,
+  Zap,
 } from 'lucide-react'
 import {
   Link,
@@ -25,7 +28,7 @@ import {
   useParams,
 } from 'react-router-dom'
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'https://admin.qodexia.site/api/v1'
+const API_BASE = import.meta.env.VITE_API_URL ?? 'https://ecommerce.qodexia.site/api/v1'
 const TOKEN_KEY = 'qodexia_storefront_token'
 const USER_KEY = 'qodexia_storefront_user'
 
@@ -263,6 +266,10 @@ function icon(name: string) {
     order: Package,
     pin: Sparkles,
     heart: Heart,
+    delivery: Truck,
+    speed: Zap,
+    secure: ShieldCheck,
+    arrow: ArrowRight,
   }
   const Icon = map[name as keyof typeof map] ?? Sparkles
   return <Icon className="icon" strokeWidth={2.1} />
@@ -494,7 +501,7 @@ function SiteHeader({ state }: { state: AppState }) {
       <div className="shell site-header__inner">
         <Link className="brand" to="/">
           <span className="brand__mark">{icon('bag')}</span>
-          <span>Nexo Store</span>
+          <span>Qodexia</span>
         </Link>
 
         <button className="mobile-toggle" type="button" onClick={() => setOpen((value) => !value)}>
@@ -507,7 +514,7 @@ function SiteHeader({ state }: { state: AppState }) {
           <HeaderLink to="/carrito">{icon('cart')} Carrito ({state.cart.count})</HeaderLink>
           {state.user ? (
             <>
-              <HeaderLink to="/perfil">{icon('user')} Perfil</HeaderLink>
+              <HeaderLink to="/perfil">{icon('user')} Cuenta</HeaderLink>
               <button className="button button--solid button--small" type="button" onClick={() => void state.logout()}>
                 {icon('logout')} Salir
               </button>
@@ -539,83 +546,147 @@ function SiteFooter({ state }: { state: AppState }) {
     <footer className="site-footer">
       <div className="shell footer-grid">
         <div>
-          <p className="footer-brand">{icon('bag')} Nexo Store</p>
+          <p className="footer-brand">{icon('bag')} Qodexia</p>
           <p className="footer-copy">
-            Plataforma ecommerce para comprar tecnología, accesorios y gestionar pedidos.
+            Storefront React conectado a la API productiva de Qodexia para catálogo, carrito,
+            checkout y cuenta del cliente.
           </p>
         </div>
         <div>
-          <p className="footer-title">Navegación</p>
+          <p className="footer-title">Explorar</p>
           <div className="footer-links">
             <Link to="/">Inicio</Link>
             <Link to="/productos">Productos</Link>
             <Link to="/carrito">Carrito ({state.cart.count})</Link>
-            {state.user ? <Link to="/perfil">Perfil</Link> : <Link to="/login">Acceso</Link>}
+            {state.user ? <Link to="/perfil">Cuenta</Link> : <Link to="/login">Acceso</Link>}
           </div>
         </div>
         <div>
-          <p className="footer-title">Soporte</p>
+          <p className="footer-title">Operación</p>
           <div className="footer-links">
-            <a href="https://admin.qodexia.site/admin" target="_blank" rel="noreferrer">
+            <a href="https://ecommerce.qodexia.site/admin" target="_blank" rel="noreferrer">
               Panel admin
             </a>
-            <a href="https://admin.qodexia.site/politicas-y-legales" target="_blank" rel="noreferrer">
+            <a href="https://ecommerce.qodexia.site/politicas-y-legales" target="_blank" rel="noreferrer">
               Políticas y legales
             </a>
-            <span>Lun-Vie 09:00 a 18:00</span>
+            <span>API: ecommerce.qodexia.site/api/v1</span>
           </div>
         </div>
       </div>
-      <div className="footer-legal">© 2026 Nexo Store. Todos los derechos reservados.</div>
+      <div className="footer-legal">© 2026 Qodexia. Frontend público desplegable como sitio estático.</div>
     </footer>
   )
 }
 
 function HomePage({ state }: { state: AppState }) {
   const featured = state.products.filter((product) => product.featured).slice(0, 4)
+  const heroProducts = featured.slice(0, 2)
+  const leadCategories = state.categories.slice(0, 3)
+  const operationalHighlights = [
+    {
+      title: 'Checkout claro',
+      description: 'Resumen limpio, cálculo de envío, cupón y compra por transferencia.',
+      iconName: 'secure',
+    },
+    {
+      title: 'Entrega utilitaria',
+      description: 'Carrito, direcciones y órdenes conectados al backend en producción.',
+      iconName: 'delivery',
+    },
+    {
+      title: 'Catálogo vivo',
+      description: 'Productos, categorías y detalle sincronizados con la API pública.',
+      iconName: 'speed',
+    },
+  ] as const
 
   return (
     <div className="shell page-stack">
       <section className="hero-panel">
-        <span className="eyebrow">Tienda en línea</span>
-        <h1>Encuentra tecnología, accesorios y ofertas en un solo lugar</h1>
-        <p>
-          Explora el catálogo por categoría, compara productos y compra en minutos desde Nexo Store.
-        </p>
-        <div className="hero-actions">
-          <Link className="button button--solid" to="/productos#productos">
-            Ver productos
-          </Link>
-          {state.user ? (
-            <Link className="button button--success" to="/productos">
-              Ir al catálogo
-            </Link>
-          ) : (
-            <Link className="button button--ghost" to="/login">
-              Entrar a mi cuenta
-            </Link>
-          )}
+        <div className="hero-layout">
+          <div className="hero-copy">
+            <span className="eyebrow">Qodexia storefront</span>
+            <h1>Tecnología curada con una experiencia sobria, rápida y comercial.</h1>
+            <p>
+              Un frente de tienda minimal tech premium para explorar catálogo, comparar productos
+              y cerrar compra sin ruido visual ni bloques inflados.
+            </p>
+            <div className="hero-actions">
+              <Link className="button button--solid" to="/productos#productos">
+                Explorar catálogo {icon('arrow')}
+              </Link>
+              {state.user ? (
+                <Link className="button button--success" to="/productos">
+                  Continuar comprando
+                </Link>
+              ) : (
+                <Link className="button button--ghost" to="/login">
+                  Entrar a mi cuenta
+                </Link>
+              )}
+            </div>
+            <div className="hero-stats">
+              <article>
+                <strong>{state.products.length}</strong>
+                <span>productos activos</span>
+              </article>
+              <article>
+                <strong>{state.categories.length}</strong>
+                <span>categorías</span>
+              </article>
+              <article>
+                <strong>24/7</strong>
+                <span>operación online</span>
+              </article>
+            </div>
+          </div>
+
+          <div className="hero-showcase">
+            {heroProducts.map((product) => (
+              <article className="hero-product" key={product.id}>
+                <div className="hero-product__media">
+                  <img alt={product.name} src={absoluteImageUrl(product.image_url)} />
+                </div>
+                <div className="hero-product__body">
+                  <span className="pill">{product.categories[0]?.name ?? 'General'}</span>
+                  <h3>{product.name}</h3>
+                  <p>{truncate(product.short_description || product.description, 76)}</p>
+                  <div className="hero-product__meta">
+                    <strong>{money(product.effective_price)}</strong>
+                    <Link to={`/productos/${product.slug}`}>Ver detalle</Link>
+                  </div>
+                </div>
+              </article>
+            ))}
+
+            <div className="hero-note">
+              <span>{icon('star')}</span>
+              <div>
+                <strong>Stack estable</strong>
+                <p>React + Vite + Router + API Laravel, desplegado como estático detrás de Nginx.</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="hero-stats">
-          <article>
-            <strong>{state.products.length}</strong>
-            <span>productos activos</span>
+      </section>
+
+      <section className="service-grid">
+        {operationalHighlights.map((item) => (
+          <article className="service-card" key={item.title}>
+            <span className="service-card__icon">{icon(item.iconName)}</span>
+            <div>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+            </div>
           </article>
-          <article>
-            <strong>{state.categories.length}</strong>
-            <span>categorías</span>
-          </article>
-          <article>
-            <strong>24/7</strong>
-            <span>storefront online</span>
-          </article>
-        </div>
+        ))}
       </section>
 
       <section id="productos" className="page-stack">
         <SectionTitle
           title="Productos destacados"
-          subtitle="Una selección inicial para empezar hoy. Puedes ver el catálogo completo en la sección de productos."
+          subtitle="Una primera selección con mejor densidad, jerarquía y lectura comercial."
         />
         <div className="product-grid product-grid--featured">
           {featured.map((product) => (
@@ -632,17 +703,43 @@ function HomePage({ state }: { state: AppState }) {
       <section className="page-stack">
         <SectionTitle
           title="Categorías"
-          subtitle="Explora por tipo de producto."
+          subtitle="Entrada rápida al catálogo por familia de producto."
         />
         <div className="category-grid">
-          {state.categories.map((category) => (
+          {leadCategories.map((category) => (
             <article className="category-card" key={category.id}>
               <span className="category-card__icon">{icon('bag')}</span>
               <h3>{category.name}</h3>
-              <p>{category.products_count} producto(s)</p>
+              <p>{truncate(category.description || 'Colección curada para compra rápida.', 92)}</p>
+              <p className="category-card__meta">{category.products_count} producto(s)</p>
               <Link to={`/productos?categoria=${category.slug}`}>Ver categoría</Link>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="editorial-panel">
+        <div className="editorial-panel__copy">
+          <span className="eyebrow">Compra con criterio</span>
+          <h2>Menos ornamento, mejor lectura de producto.</h2>
+          <p>
+            La dirección visual prioriza contraste, escala tipográfica y bloques compactos para que
+            catálogo, detalle, carrito y cuenta se sientan parte del mismo sistema.
+          </p>
+        </div>
+        <div className="editorial-panel__list">
+          <article>
+            <strong>Hero calibrado</strong>
+            <p>Menos aire vacío, mejor proporción entre titular, acciones y producto destacado.</p>
+          </article>
+          <article>
+            <strong>Cards compactas</strong>
+            <p>Componentes más densos, consistentes y útiles para navegación y conversión.</p>
+          </article>
+          <article>
+            <strong>Footer con peso</strong>
+            <p>Cierre más creíble, con contexto operativo real y mejor presencia visual.</p>
+          </article>
         </div>
       </section>
     </div>
@@ -679,7 +776,7 @@ function CatalogPage({ state }: { state: AppState }) {
         <p>
           {activeCategory
             ? activeCategory.description
-            : 'Encuentra el producto ideal para tu compra.'}
+            : 'Encuentra el producto ideal con una lectura más precisa, filtros claros y cards mejor proporcionadas.'}
         </p>
 
         <div className="catalog-toolbar catalog-toolbar--search">
@@ -1391,10 +1488,10 @@ function AccountPage({ state }: { state: AppState }) {
     <div className="shell page-stack">
       <SectionTitle title={`Hola, ${state.user?.name ?? ''}`} subtitle="Tu cuenta conectada al backend productivo." />
       <div className="account-grid">
-        <AccountLink to="/perfil/ordenes" title="Órdenes" subtitle="Historial y detalles." />
-        <AccountLink to="/perfil/wishlist" title="Wishlist" subtitle="Productos favoritos." />
-        <AccountLink to="/perfil/direcciones" title="Direcciones" subtitle="Gestiona entregas." />
-        <AccountLink to="/perfil/resenas" title="Reseñas" subtitle="Tus opiniones publicadas." />
+        <AccountLink to="/perfil/ordenes" title="Órdenes" subtitle="Historial, totales y detalle por compra." />
+        <AccountLink to="/perfil/wishlist" title="Wishlist" subtitle="Productos guardados para volver luego." />
+        <AccountLink to="/perfil/direcciones" title="Direcciones" subtitle="Entrega y datos de envío guardados." />
+        <AccountLink to="/perfil/resenas" title="Reseñas" subtitle="Tus opiniones publicadas en la tienda." />
       </div>
     </div>
   )
@@ -1723,7 +1820,7 @@ function truncate(value: string, size: number) {
 }
 
 function absoluteImageUrl(path: string) {
-  return path.startsWith('http') ? path : `https://admin.qodexia.site${path}`
+  return path.startsWith('http') ? path : `https://ecommerce.qodexia.site${path}`
 }
 
 export default App
